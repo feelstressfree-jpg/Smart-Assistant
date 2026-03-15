@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Assistant Pro</title>
+    <title>Pro Multilingual Translator</title>
     <style>
         :root {
-            --bg-color: #f4f4f9;
+            --bg-color: #f0f2f5;
             --card-bg: #ffffff;
-            --text-color: #333;
-            --accent-color: #007bff;
+            --text-color: #1c1e21;
+            --accent: #007bff;
+            --secondary-bg: #e4e6eb;
         }
 
-        body.dark-mode {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #3700b3;
+        [data-theme="dark"] {
+            --bg-color: #18191a;
+            --card-bg: #242526;
+            --text-color: #e4e6eb;
+            --accent: #45bd62;
+            --secondary-bg: #3a3b3c;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -28,120 +30,171 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            transition: 0.3s;
+            transition: all 0.4s ease;
         }
 
-        #main-container {
+        .card {
             background: var(--card-bg);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             width: 90%;
             max-width: 450px;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
             text-align: center;
-            transition: 0.3s;
         }
 
-        .controls { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        
-        button {
-            padding: 10px 20px;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--secondary-bg);
+            background: var(--secondary-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        .btn-mic {
+            background: var(--accent);
+            color: white;
             border: none;
-            border-radius: 5px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
             cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
             font-weight: bold;
-            transition: 0.2s;
         }
 
-        #start-btn { background: #28a745; color: white; }
-        #stop-btn { background: #dc3545; color: white; }
-        #dark-mode-btn { background: #6c757d; color: white; font-size: 12px; }
+        .btn-mic:active { transform: scale(0.98); }
 
-        .display-area {
-            margin-top: 15px;
-            padding: 15px;
-            border: 1px solid #ddd;
+        #status {
+            margin: 15px 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .result-area {
+            background: var(--secondary-bg);
+            padding: 20px;
             border-radius: 10px;
-            min-height: 100px;
-            background: var(--bg-color);
+            min-height: 80px;
+            margin-top: 10px;
+            line-height: 1.5;
             text-align: left;
         }
 
-        .slider-container { margin-top: 20px; font-size: 13px; }
-        input[type="range"] { width: 100%; cursor: pointer; }
-
-        .label { font-weight: bold; color: var(--accent-color); font-size: 14px; }
+        .theme-toggle {
+            cursor: pointer;
+            padding: 8px;
+            background: var(--secondary-bg);
+            border-radius: 50%;
+            border: none;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
 
-<div id="main-container">
-    <div class="controls">
-        <button id="dark-mode-btn" onclick="toggleDarkMode()">Dark Mode</button>
-        <div>
-            <button id="start-btn" onclick="startProcess()">Start</button>
-            <button id="stop-btn" onclick="stopProcess()">Stop</button>
-        </div>
+<div class="card">
+    <div class="header">
+        <h2 style="margin:0;">Translator AI</h2>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Change Mode">🌓</button>
     </div>
 
-    <div class="label">Input (Hindi):</div>
-    <div id="input-text" class="display-area">Aapki awaaz yahan dikhegi...</div>
+    <p style="font-size: 0.9rem; margin-bottom: 10px;">Bhasha chunein:</p>
+    <select id="langList">
+        <option value="hi-IN">Hindi (हिन्दी)</option>
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="fr-FR">French (Français)</option>
+        <option value="es-ES">Spanish (Español)</option>
+        <option value="de-DE">German (Deutsch)</option>
+        <option value="ja-JP">Japanese (日本語)</option>
+        <option value="ru-RU">Russian (Pусский)</option>
+        <option value="pt-BR">Portuguese (Português)</option>
+        <option value="zh-CN">Chinese (Mandarin)</option>
+    </select>
 
-    <div class="label" style="margin-top:15px;">Output (English):</div>
-    <div id="output-text" class="display-area">Translation yahan dikhega...</div>
+    <button class="btn-mic" id="micBtn">🎤 Bolna Shuru Karein</button>
+    
+    <div id="status">Taiyaar hai...</div>
 
-    <div class="slider-container">
-        <label>Stealth Mode (Opacity):</label>
-        <input type="range" min="0.05" max="1" step="0.05" value="1" oninput="adjustOpacity(this.value)">
+    <div class="result-area" id="output">
+        Aapka bola hua text yahan dikhega...
     </div>
 </div>
 
 <script>
+    const micBtn = document.getElementById('micBtn');
+    const output = document.getElementById('output');
+    const status = document.getElementById('status');
+    const langList = document.getElementById('langList');
+
+    let isListening = false;
     let recognition;
+
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
-        recognition.lang = 'hi-IN';
-        recognition.continuous = true;
+        recognition.continuous = false; // "What are you doing" loop ko rokne ke liye
         recognition.interimResults = false;
+
+        recognition.onstart = () => {
+            status.innerText = "Sun raha hoon... Kripya bolein.";
+            micBtn.style.filter = "hue-rotate(90deg)";
+            isListening = true;
+        };
+
+        recognition.onresult = (event) => {
+            const text = event.results[0][0].transcript;
+            output.innerText = text;
+            status.innerText = "Suna gaya!";
+        };
+
+        recognition.onerror = (e) => {
+            status.innerText = "Error: " + e.error;
+            stopMic();
+        };
+
+        recognition.onend = () => {
+            stopMic();
+        };
+    } else {
+        status.innerText = "Aapka browser voice support nahi karta.";
     }
 
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        const btn = document.getElementById('dark-mode-btn');
-        btn.innerText = document.body.classList.contains('dark-mode') ? "Light Mode" : "Dark Mode";
+    function stopMic() {
+        isListening = false;
+        micBtn.style.filter = "none";
+        status.innerText = "Taiyaar hai...";
     }
 
-    function adjustOpacity(val) {
-        document.getElementById('main-container').style.opacity = val;
-    }
-
-    function startProcess() {
-        recognition.start();
-        document.getElementById('input-text').innerText = "Suna ja raha hai...";
-    }
-
-    function stopProcess() {
-        recognition.stop();
-    }
-
-    recognition.onresult = async (event) => {
-        let hindiText = event.results[event.results.length - 1][0].transcript;
-        document.getElementById('input-text').innerText = hindiText;
-
-        // Translation API Call
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${hindiText}&langpair=hi|en`);
-        const data = await res.json();
-        let englishText = data.responseData.translatedText;
-        
-        document.getElementById('output-text').innerText = englishText;
-
-        // Voice Output
-        let speech = new SpeechSynthesisUtterance(englishText);
-        speech.lang = 'en-US';
-        window.speechSynthesis.speak(speech);
+    micBtn.onclick = () => {
+        if (!isListening) {
+            recognition.lang = langList.value;
+            recognition.start();
+        } else {
+            recognition.stop();
+        }
     };
 
-    recognition.onerror = (err) => console.error("Error:", err);
+    function toggleTheme() {
+        const body = document.body;
+        if (body.hasAttribute('data-theme')) {
+            body.removeAttribute('data-theme');
+        } else {
+            body.setAttribute('data-theme', 'dark');
+        }
+    }
 </script>
 
 </body>
