@@ -62,10 +62,6 @@
             cursor: pointer;
         }
 
-        .mic-section {
-            margin: 20px 0;
-        }
-
         #startBtn {
             background: var(--primary);
             color: white;
@@ -79,7 +75,7 @@
             transition: 0.3s;
         }
 
-        #startBtn:active { transform: scale(0.95); }
+        #startBtn:disabled { background: #ccc; cursor: not-allowed; }
 
         .status {
             margin: 15px 0;
@@ -160,16 +156,22 @@
     const langSelect = document.getElementById('langSelect');
 
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'hi-IN'; // Default input Hindi rakha hai
+    recognition.lang = 'hi-IN'; 
+    recognition.continuous = false; // Maanushik loop rokne ke liye
     recognition.interimResults = false;
 
     startBtn.onclick = () => {
-        recognition.start();
-        status.innerText = "Listening...";
-        startBtn.innerText = "Recording...";
+        try {
+            recognition.start();
+            status.innerText = "Listening...";
+            startBtn.disabled = true;
+        } catch(e) { console.log("Already started"); }
     };
 
     recognition.onresult = async (event) => {
+        // Step 1: Pehle sunna band karo taaki loop na bane
+        recognition.stop(); 
+        
         const text = event.results[0][0].transcript;
         userInput.innerText = text;
         status.innerText = "Translating...";
@@ -177,36 +179,49 @@
         const target = langSelect.value;
         
         try {
-            // Free Translation API
             const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURI(text)}`);
             const data = await res.json();
             const translatedText = data[0][0][0];
             
             translatedOutput.innerText = translatedText;
+            status.innerText = "Speaking...";
             speak(translatedText, target);
-            status.innerText = "Done!";
         } catch (err) {
             status.innerText = "Translation Error";
+            startBtn.disabled = false;
         }
-        startBtn.innerText = "Click to Speak";
     };
 
     function speak(text, lang) {
+        // Voice khatam hone par hi button wapas enable hoga
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang;
+        
+        utterance.onend = () => {
+            status.innerText = "Ready";
+            startBtn.disabled = false;
+        };
+
         window.speechSynthesis.speak(utterance);
     }
+
+    recognition.onerror = () => {
+        status.innerText = "Try again...";
+        startBtn.disabled = false;
+    };
+
+    recognition.onend = () => {
+        if(status.innerText === "Listening...") {
+            status.innerText = "Ready";
+            startBtn.disabled = false;
+        }
+    };
 
     function toggleTheme() {
         document.body.getAttribute('data-theme') === 'dark' 
             ? document.body.removeAttribute('data-theme') 
             : document.body.setAttribute('data-theme', 'dark');
     }
-
-    recognition.onerror = () => {
-        status.innerText = "Error occurred";
-        startBtn.innerText = "Click to Speak";
-    };
 </script>
 
 </body>
