@@ -3,43 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Multilingual Translator</title>
+    <title>AI Voice Translator Pro</title>
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-color: #1c1e21;
-            --accent: #007bff;
-            --secondary-bg: #e4e6eb;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #212529;
+            --primary: #4361ee;
+            --secondary: #e9ecef;
         }
 
         [data-theme="dark"] {
-            --bg-color: #18191a;
-            --card-bg: #242526;
-            --text-color: #e4e6eb;
-            --accent: #45bd62;
-            --secondary-bg: #3a3b3c;
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #ffffff;
+            --primary: #4cc9f0;
+            --secondary: #333333;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            transition: all 0.4s ease;
+            transition: 0.3s;
         }
 
-        .card {
-            background: var(--card-bg);
+        .container {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             width: 90%;
-            max-width: 450px;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+            max-width: 480px;
             text-align: center;
         }
 
@@ -47,154 +47,166 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         select {
             width: 100%;
             padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--secondary-bg);
-            background: var(--secondary-bg);
-            color: var(--text-color);
-            font-size: 1rem;
-            margin-bottom: 15px;
-            outline: none;
+            border-radius: 12px;
+            border: 2px solid var(--secondary);
+            background: var(--secondary);
+            color: var(--text);
+            font-size: 16px;
+            margin-bottom: 20px;
+            cursor: pointer;
         }
 
-        .btn-mic {
-            background: var(--accent);
+        .mic-section {
+            margin: 20px 0;
+        }
+
+        #startBtn {
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 18px 40px;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.2s;
-            font-weight: bold;
+            transition: 0.3s;
         }
 
-        .btn-mic:active { transform: scale(0.98); }
+        #startBtn:active { transform: scale(0.95); }
 
-        #status {
+        .status {
             margin: 15px 0;
-            font-size: 0.9rem;
-            opacity: 0.8;
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 500;
+            height: 20px;
         }
 
-        .result-area {
-            background: var(--secondary-bg);
-            padding: 20px;
-            border-radius: 10px;
-            min-height: 80px;
-            margin-top: 10px;
-            line-height: 1.5;
+        .output-container {
             text-align: left;
+            margin-top: 20px;
         }
 
-        .theme-toggle {
-            cursor: pointer;
-            padding: 8px;
-            background: var(--secondary-bg);
-            border-radius: 50%;
+        .box {
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 8px;
+            min-height: 50px;
+            font-size: 16px;
+        }
+
+        .theme-btn {
+            background: var(--secondary);
             border: none;
-            font-size: 1.2rem;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
 
-<div class="card">
+<div class="container">
     <div class="header">
-        <h2 style="margin:0;">Translator AI</h2>
-        <button class="theme-toggle" onclick="toggleTheme()" title="Change Mode">🌓</button>
+        <h2 style="margin:0">Voice AI</h2>
+        <button class="theme-btn" onclick="toggleTheme()">🌓</button>
     </div>
 
-    <p style="font-size: 0.9rem; margin-bottom: 10px;">Bhasha chunein:</p>
-    <select id="langList">
-        <option value="hi-IN">Hindi (हिन्दी)</option>
-        <option value="en-US">English (US)</option>
-        <option value="en-GB">English (UK)</option>
-        <option value="fr-FR">French (Français)</option>
-        <option value="es-ES">Spanish (Español)</option>
-        <option value="de-DE">German (Deutsch)</option>
-        <option value="ja-JP">Japanese (日本語)</option>
-        <option value="ru-RU">Russian (Pусский)</option>
-        <option value="pt-BR">Portuguese (Português)</option>
-        <option value="zh-CN">Chinese (Mandarin)</option>
+    <label style="display:block; text-align:left; margin-bottom:8px; font-size:14px;">Select Target Language:</label>
+    <select id="langSelect">
+        <option value="en">English (US)</option>
+        <option value="hi">Hindi (हिन्दी)</option>
+        <option value="es">Spanish (Español)</option>
+        <option value="fr">French (Français)</option>
+        <option value="de">German (Deutsch)</option>
+        <option value="ja">Japanese (日本語)</option>
+        <option value="zh">Chinese (Mandarin)</option>
+        <option value="ru">Russian (Русский)</option>
+        <option value="ar">Arabic (العربية)</option>
+        <option value="pt">Portuguese (Português)</option>
+        <option value="it">Italian (Italiano)</option>
+        <option value="ko">Korean (한국어)</option>
+        <option value="tr">Turkish (Türkçe)</option>
+        <option value="nl">Dutch (Nederlands)</option>
+        <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
     </select>
 
-    <button class="btn-mic" id="micBtn">🎤 Bolna Shuru Karein</button>
-    
-    <div id="status">Taiyaar hai...</div>
+    <button id="startBtn">Click to Speak</button>
+    <div class="status" id="status">Ready</div>
 
-    <div class="result-area" id="output">
-        Aapka bola hua text yahan dikhega...
+    <div class="output-container">
+        <div style="font-size:12px; opacity:0.7">Recognized Text:</div>
+        <div class="box" id="userInput">...</div>
+        
+        <div style="font-size:12px; opacity:0.7; margin-top:15px;">Translated Text:</div>
+        <div class="box" id="translatedOutput" style="border-left: 4px solid var(--primary);">...</div>
     </div>
 </div>
 
 <script>
-    const micBtn = document.getElementById('micBtn');
-    const output = document.getElementById('output');
+    const startBtn = document.getElementById('startBtn');
     const status = document.getElementById('status');
-    const langList = document.getElementById('langList');
+    const userInput = document.getElementById('userInput');
+    const translatedOutput = document.getElementById('translatedOutput');
+    const langSelect = document.getElementById('langSelect');
 
-    let isListening = false;
-    let recognition;
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'hi-IN'; // Default input Hindi rakha hai
+    recognition.interimResults = false;
 
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = false; // "What are you doing" loop ko rokne ke liye
-        recognition.interimResults = false;
-
-        recognition.onstart = () => {
-            status.innerText = "Sun raha hoon... Kripya bolein.";
-            micBtn.style.filter = "hue-rotate(90deg)";
-            isListening = true;
-        };
-
-        recognition.onresult = (event) => {
-            const text = event.results[0][0].transcript;
-            output.innerText = text;
-            status.innerText = "Suna gaya!";
-        };
-
-        recognition.onerror = (e) => {
-            status.innerText = "Error: " + e.error;
-            stopMic();
-        };
-
-        recognition.onend = () => {
-            stopMic();
-        };
-    } else {
-        status.innerText = "Aapka browser voice support nahi karta.";
-    }
-
-    function stopMic() {
-        isListening = false;
-        micBtn.style.filter = "none";
-        status.innerText = "Taiyaar hai...";
-    }
-
-    micBtn.onclick = () => {
-        if (!isListening) {
-            recognition.lang = langList.value;
-            recognition.start();
-        } else {
-            recognition.stop();
-        }
+    startBtn.onclick = () => {
+        recognition.start();
+        status.innerText = "Listening...";
+        startBtn.innerText = "Recording...";
     };
 
-    function toggleTheme() {
-        const body = document.body;
-        if (body.hasAttribute('data-theme')) {
-            body.removeAttribute('data-theme');
-        } else {
-            body.setAttribute('data-theme', 'dark');
+    recognition.onresult = async (event) => {
+        const text = event.results[0][0].transcript;
+        userInput.innerText = text;
+        status.innerText = "Translating...";
+
+        const target = langSelect.value;
+        
+        try {
+            // Free Translation API
+            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURI(text)}`);
+            const data = await res.json();
+            const translatedText = data[0][0][0];
+            
+            translatedOutput.innerText = translatedText;
+            speak(translatedText, target);
+            status.innerText = "Done!";
+        } catch (err) {
+            status.innerText = "Translation Error";
         }
+        startBtn.innerText = "Click to Speak";
+    };
+
+    function speak(text, lang) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        window.speechSynthesis.speak(utterance);
     }
+
+    function toggleTheme() {
+        document.body.getAttribute('data-theme') === 'dark' 
+            ? document.body.removeAttribute('data-theme') 
+            : document.body.setAttribute('data-theme', 'dark');
+    }
+
+    recognition.onerror = () => {
+        status.innerText = "Error occurred";
+        startBtn.innerText = "Click to Speak";
+    };
 </script>
 
 </body>
