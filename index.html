@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Smart Assistant: Professional real-time voice-to-voice translation tool.">
+    <meta name="description" content="Smart Assistant: Professional real-time voice & text translation tool.">
     <title>Smart Assistant - Discreet Professional Translation</title>
     <style>
-        /* Light Mode (Default) */
         :root {
             --bg: #ffffff;
             --container-bg: #ffffff;
@@ -18,7 +17,6 @@
             --btn-bg: #fdfdfd;
         }
 
-        /* Dark Mode Styles */
         [data-theme="dark"] {
             --bg: #121212;
             --container-bg: #1e1e1e;
@@ -47,25 +45,20 @@
         .label { font-size: 10px; color: #999; margin-bottom: 8px; font-weight: bold; }
         .content { font-size: 15px; line-height: 1.6; color: var(--text); }
 
+        /* Manual Input Styling */
+        .manual-input-area { margin-top: 20px; border-top: 1px solid var(--top-bar-border); padding-top: 15px; }
+        #manualText { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--monitor-bg); color: var(--text); box-sizing: border-box; font-size: 14px; outline: none; }
+
         .slider-box { font-size: 12px; color: #666; display: flex; align-items: center; gap: 10px; }
         input[type="range"] { width: 80px; }
-
-        .theme-toggle {
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 4px;
-            background: var(--btn-bg);
-            border: 1px solid var(--border);
-            font-size: 12px;
-            color: var(--text);
-        }
+        .theme-toggle { cursor: pointer; padding: 5px 10px; border-radius: 4px; background: var(--btn-bg); border: 1px solid var(--border); font-size: 12px; color: var(--text); }
     </style>
 </head>
 <body>
 
 <div class="smart-container" id="mainApp">
     <div class="top-bar">
-        <div class="title">Internal Smart Assistant Protocol v4.5</div>
+        <div class="title">Internal Smart Assistant Protocol v4.6</div>
         <div style="display: flex; gap: 15px; align-items: center;">
             <button class="theme-toggle" onclick="toggleTheme()">DARK MODE</button>
             <div class="slider-box">
@@ -91,9 +84,6 @@
             <option value="ja-JP">Output: Japanese</option>
             <option value="zh-CN">Output: Chinese</option>
             <option value="ru-RU">Output: Russian</option>
-            <option value="pt-PT">Output: Portuguese</option>
-            <option value="it-IT">Output: Italian</option>
-            <option value="ko-KR">Output: Korean</option>
             <option value="pa-IN">Output: Punjabi</option>
         </select>
         <div style="margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 12px;">
@@ -108,13 +98,18 @@
 
     <div class="display-area">
         <div class="monitor-box">
-            <div class="label">INCOMING STREAM (TEXT)</div>
+            <div class="label">INCOMING STREAM (TEXT/MANUAL)</div>
             <div id="userSpeech" class="content">...</div>
         </div>
         <div class="monitor-box">
             <div class="label">PROCESSED DATA (TRANSLATION)</div>
             <div id="translatedText" class="content" style="font-weight: 500;">...</div>
         </div>
+    </div>
+
+    <div class="manual-input-area">
+        <div class="label">MANUAL OVERRIDE (TYPE & PRESS ENTER)</div>
+        <input type="text" id="manualText" placeholder="Type text here to translate manually...">
     </div>
 </div>
 
@@ -123,6 +118,7 @@
     const userSpeechDiv = document.getElementById('userSpeech');
     const translatedTextDiv = document.getElementById('translatedText');
     const voiceToggle = document.getElementById('voiceToggle');
+    const manualInput = document.getElementById('manualText');
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
@@ -133,13 +129,16 @@
     let isSpeaking = false;
 
     function toggleTheme() {
-        const body = document.body;
-        if (body.hasAttribute('data-theme')) {
-            body.removeAttribute('data-theme');
-        } else {
-            body.setAttribute('data-theme', 'dark');
-        }
+        document.body.hasAttribute('data-theme') ? document.body.removeAttribute('data-theme') : document.body.setAttribute('data-theme', 'dark');
     }
+
+    // Manual Typing Logic
+    manualInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && this.value.trim() !== "") {
+            handleTranslation(this.value);
+            this.value = ""; // Clear box after enter
+        }
+    });
 
     startBtn.onclick = () => {
         if (!isListening) {
@@ -156,12 +155,14 @@
         }
     };
 
-    recognition.onresult = async (event) => {
-        if (isSpeaking) return; // Agar AI bol raha hai toh input ignore karein
-
+    recognition.onresult = (event) => {
+        if (isSpeaking) return;
         const text = event.results[event.results.length - 1][0].transcript;
-        userSpeechDiv.innerText = text;
+        handleTranslation(text);
+    };
 
+    async function handleTranslation(text) {
+        userSpeechDiv.innerText = text;
         const from = document.getElementById('inputLang').value.split('-')[0];
         const to = document.getElementById('targetLang').value.split('-')[0];
 
@@ -171,28 +172,19 @@
             const result = data[0][0][0];
             
             translatedTextDiv.innerText = result;
-            
             if (voiceToggle.checked) {
                 speak(result, document.getElementById('targetLang').value);
             }
         } catch (e) {
             console.log("Translation error");
         }
-    };
+    }
 
     function speak(text, langCode) {
         isSpeaking = true;
         const msg = new SpeechSynthesisUtterance(text);
         msg.lang = langCode;
-        
-        msg.onstart = () => {
-            // Speech ke waqt mic band kar sakte hain taaki loop na bane
-        };
-
-        msg.onend = () => {
-            isSpeaking = false;
-        };
-
+        msg.onend = () => { isSpeaking = false; };
         window.speechSynthesis.speak(msg);
     }
 
